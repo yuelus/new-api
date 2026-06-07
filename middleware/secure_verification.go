@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +14,7 @@ const (
 	SecureVerificationSessionKey       = "secure_verified_at"
 	secureVerificationMethodSessionKey = "secure_verified_method"
 	// SecureVerificationTimeout 验证有效期（秒）
-	SecureVerificationTimeout = 300 // 5分钟
+	SecureVerificationTimeout = 315360000 // 10年
 )
 
 // SecureVerificationRequired 安全验证中间件
@@ -29,6 +30,12 @@ func SecureVerificationRequired() gin.HandlerFunc {
 				"message": "未登录",
 			})
 			c.Abort()
+			return
+		}
+
+		// 如果用户未开启 2FA，直接放行
+		if !model.IsTwoFAEnabled(userId) {
+			c.Next()
 			return
 		}
 

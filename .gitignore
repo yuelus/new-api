@@ -36,3 +36,11 @@ data/
 token_estimator_test.go
 skills-lock.json
 .playwright-mcp
+
+# Local channel maintenance scripts may contain credentials.
+analyze_channels.py
+fix_channels.py
+fix_merge.py
+setup_channels.py
+setup_channels.sh
+split_channels.py
