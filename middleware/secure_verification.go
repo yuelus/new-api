@@ -6,26 +6,31 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/model"
-"github.com/QuantumNous/new-api/service"
+	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
 )
 
 // SecureVerificationTimeout is retained for compatibility with the local session-based verification configuration.
 const SecureVerificationTimeout = 315360000 // 10 years
 
-)
-
 // SecureVerificationRequired protects channel key disclosure. Other sensitive
 // operations validate their narrower proof scopes in their controller.
 func SecureVerificationRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-	if userID := c.GetInt("id"); userID > 0 {
-		if enabled, err := model.IsTwoFAEnabled(userID); err == nil && !enabled {
-			c.Set("secure_verified", true)
-			c.Next()
-			return
+		if userID := c.GetInt("id"); userID > 0 {
+			if enabled, err := model.IsTwoFAEnabled(userID); err == nil && !enabled {
+				c.Set("secure_verified", true)
+				c.Next()
+				return
+			}
 		}
-	}
+		if userID := c.GetInt("id"); userID > 0 {
+			if enabled, err := model.IsTwoFAEnabled(userID); err == nil && !enabled {
+				c.Set("secure_verified", true)
+				c.Next()
+				return
+			}
+		}
 		if !RequireSecurityProof(c, "channel.key.read", []string{"2fa", "passkey"}) {
 			return
 		}
