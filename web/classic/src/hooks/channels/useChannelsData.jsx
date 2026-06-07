@@ -53,6 +53,7 @@ export const useChannelsData = () => {
   const [pageSize, setPageSize] = useState(ITEMS_PER_PAGE);
   const [channelCount, setChannelCount] = useState(0);
   const [groupOptions, setGroupOptions] = useState([]);
+  const [tagOptions, setTagOptions] = useState([]);
 
   // UI states
   const [showEdit, setShowEdit] = useState(false);
@@ -126,6 +127,7 @@ export const useChannelsData = () => {
   const formInitValues = {
     searchKeyword: '',
     searchGroup: '',
+    searchTag: '',
     searchModel: '',
   };
 
@@ -312,8 +314,20 @@ export const useChannelsData = () => {
     return {
       searchKeyword: formValues.searchKeyword || '',
       searchGroup: formValues.searchGroup || '',
+      searchTag: formValues.searchTag || '',
       searchModel: formValues.searchModel || '',
     };
+  };
+
+  const updateTagOptions = (tagCounts = {}) => {
+    const options = Object.entries(tagCounts)
+      .filter(([tag, count]) => tag && Number(count) > 0)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([tag, count]) => ({
+        label: `${tag} (${count})`,
+        value: tag,
+      }));
+    setTagOptions(options);
   };
 
   // Load channels
@@ -327,7 +341,7 @@ export const useChannelsData = () => {
   ) => {
     if (statusF === undefined) statusF = statusFilter;
 
-    const { searchKeyword, searchGroup, searchModel } = getFormValues();
+    const { searchKeyword, searchGroup, searchTag, searchModel } = getFormValues();
     if (searchKeyword !== '' || searchGroup !== '' || searchModel !== '') {
       setLoading(true);
       await searchChannels(
@@ -346,8 +360,9 @@ export const useChannelsData = () => {
     setLoading(true);
     const typeParam = typeKey !== 'all' ? `&type=${typeKey}` : '';
     const statusParam = statusF !== 'all' ? `&status=${statusF}` : '';
+    const tagParam = searchTag !== '' ? `&tag=${encodeURIComponent(searchTag)}` : '';
     const res = await API.get(
-      `/api/channel/?p=${page}&page_size=${pageSize}&id_sort=${idSort}&tag_mode=${enableTagMode}${typeParam}${statusParam}`,
+      `/api/channel/?p=${page}&page_size=${pageSize}&id_sort=${idSort}&tag_mode=${enableTagMode}${typeParam}${statusParam}${tagParam}`,
     );
 
     if (res === undefined || reqId !== requestCounter.current) {
@@ -356,7 +371,7 @@ export const useChannelsData = () => {
 
     const { success, message, data } = res.data;
     if (success) {
-      const { items, total, type_counts } = data;
+      const { items, total, type_counts, tag_counts } = data;
       if (type_counts) {
         const sumAll = Object.values(type_counts).reduce(
           (acc, v) => acc + v,
@@ -364,6 +379,7 @@ export const useChannelsData = () => {
         );
         setTypeCounts({ ...type_counts, all: sumAll });
       }
+      updateTagOptions(tag_counts);
       setChannelFormat(items, enableTagMode);
       setChannelCount(total);
     } else {
@@ -381,7 +397,7 @@ export const useChannelsData = () => {
     pageSz = pageSize,
     sortFlag = idSort,
   ) => {
-    const { searchKeyword, searchGroup, searchModel } = getFormValues();
+    const { searchKeyword, searchGroup, searchTag, searchModel } = getFormValues();
     setSearching(true);
     try {
       if (searchKeyword === '' && searchGroup === '' && searchModel === '') {
@@ -398,17 +414,19 @@ export const useChannelsData = () => {
 
       const typeParam = typeKey !== 'all' ? `&type=${typeKey}` : '';
       const statusParam = statusF !== 'all' ? `&status=${statusF}` : '';
+      const tagParam = searchTag !== '' ? `&tag=${encodeURIComponent(searchTag)}` : '';
       const res = await API.get(
-        `/api/channel/search?keyword=${searchKeyword}&group=${searchGroup}&model=${searchModel}&id_sort=${sortFlag}&tag_mode=${enableTagMode}&p=${page}&page_size=${pageSz}${typeParam}${statusParam}`,
+        `/api/channel/search?keyword=${searchKeyword}&group=${searchGroup}&model=${searchModel}&id_sort=${sortFlag}&tag_mode=${enableTagMode}&p=${page}&page_size=${pageSz}${typeParam}${statusParam}${tagParam}`,
       );
       const { success, message, data } = res.data;
       if (success) {
-        const { items = [], total = 0, type_counts = {} } = data;
+        const { items = [], total = 0, type_counts = {}, tag_counts = {} } = data;
         const sumAll = Object.values(type_counts).reduce(
           (acc, v) => acc + v,
           0,
         );
         setTypeCounts({ ...type_counts, all: sumAll });
+        updateTagOptions(tag_counts);
         setChannelFormat(items, enableTagMode);
         setChannelCount(total);
         setActivePage(page);

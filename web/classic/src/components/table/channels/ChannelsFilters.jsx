@@ -32,6 +32,7 @@ const ChannelsFilters = ({
   enableTagMode,
   formApi,
   groupOptions,
+  tagOptions,
   loading,
   searching,
   t,
@@ -119,6 +120,26 @@ const ChannelsFilters = ({
               pure
               onChange={() => {
                 // 延迟执行搜索，让表单值先更新
+                setTimeout(() => {
+                  searchChannels(enableTagMode);
+                }, 0);
+              }}
+            />
+          </div>
+          <div className='w-full md:w-32'>
+            <Form.Select
+              size='small'
+              field='searchTag'
+              placeholder={t('选择标签')}
+              optionList={[
+                { label: t('选择标签'), value: null },
+                ...tagOptions,
+              ]}
+              className='w-full'
+              showClear
+              pure
+              filter
+              onChange={() => {
                 setTimeout(() => {
                   searchChannels(enableTagMode);
                 }, 0);

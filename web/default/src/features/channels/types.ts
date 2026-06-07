@@ -120,6 +120,7 @@ export interface GetChannelsResponse {
     page: number
     page_size: number
     type_counts?: Record<string, number>
+    tag_counts?: Record<string, number>
   }
 }
 
@@ -130,6 +131,7 @@ export interface SearchChannelsResponse {
     items: Channel[]
     total: number
     type_counts?: Record<string, number>
+    tag_counts?: Record<string, number>
   }
 }
 
@@ -228,6 +230,7 @@ export interface GetChannelsParams {
   status?: string // 'enabled', 'disabled', or empty for all
   type?: number
   group?: string
+  tag?: string
   id_sort?: boolean
   tag_mode?: boolean
   sort_by?: ChannelSortBy
@@ -237,6 +240,7 @@ export interface GetChannelsParams {
 export interface SearchChannelsParams {
   keyword?: string
   group?: string
+  tag?: string
   model?: string
   status?: string
   type?: number

@@ -109,6 +109,7 @@ export function ChannelsTable() {
       { columnId: 'status', searchKey: 'status', type: 'array' },
       { columnId: 'type', searchKey: 'type', type: 'array' },
       { columnId: 'group', searchKey: 'group', type: 'array' },
+      { columnId: 'tag', searchKey: 'tag', type: 'array' },
       { columnId: 'model', searchKey: 'model', type: 'string' },
     ],
   })
@@ -120,6 +121,8 @@ export function ChannelsTable() {
     (columnFilters.find((f) => f.id === 'type')?.value as string[]) || []
   const groupFilter =
     (columnFilters.find((f) => f.id === 'group')?.value as string[]) || []
+  const tagFilter =
+    (columnFilters.find((f) => f.id === 'tag')?.value as string[]) || []
   const modelFilterFromUrl =
     (columnFilters.find((f) => f.id === 'model')?.value as string) || ''
 
@@ -203,6 +206,10 @@ export function ChannelsTable() {
         statusFilter.length > 0 && !statusFilter.includes('all')
           ? statusFilter[0]
           : undefined,
+      tag:
+        tagFilter.length > 0 && !tagFilter.includes('all')
+          ? tagFilter[0]
+          : undefined,
       type:
         typeFilter.length > 0 && !typeFilter.includes('all')
           ? Number(typeFilter[0])
@@ -226,6 +233,10 @@ export function ChannelsTable() {
             statusFilter.length > 0 && !statusFilter.includes('all')
               ? statusFilter[0]
               : undefined,
+          tag:
+            tagFilter.length > 0 && !tagFilter.includes('all')
+              ? tagFilter[0]
+              : undefined,
           type:
             typeFilter.length > 0 && !typeFilter.includes('all')
               ? Number(typeFilter[0])
@@ -245,6 +256,10 @@ export function ChannelsTable() {
           status:
             statusFilter.length > 0 && !statusFilter.includes('all')
               ? statusFilter[0]
+              : undefined,
+          tag:
+            tagFilter.length > 0 && !tagFilter.includes('all')
+              ? tagFilter[0]
               : undefined,
           type:
             typeFilter.length > 0 && !typeFilter.includes('all')
@@ -274,6 +289,7 @@ export function ChannelsTable() {
 
   const totalCount = data?.data?.total || 0
   const typeCounts = data?.data?.type_counts
+  const tagCounts = data?.data?.tag_counts
 
   // Columns configuration
   const columns = useChannelsColumns()
@@ -371,6 +387,33 @@ export function ChannelsTable() {
     ...groupOptions,
   ]
 
+  const tagFilterOptions = useMemo(() => {
+    const counts = tagCounts || {}
+    const tags = Object.entries(counts)
+      .map(([tag, count]) => ({ tag, count: Number(count) || 0 }))
+      .filter((item) => item.tag && item.count > 0)
+      .sort((a, b) => a.tag.localeCompare(b.tag))
+
+    const selectedTag = tagFilter.find((value) => value !== 'all')
+    if (selectedTag && !tags.some((item) => item.tag === selectedTag)) {
+      tags.push({ tag: selectedTag, count: Number(counts[selectedTag]) || 0 })
+    }
+
+    const totalTags = Object.values(counts).reduce(
+      (sum, count) => sum + (Number(count) || 0),
+      0
+    )
+
+    return [
+      { label: t('All Tags'), value: 'all', count: totalTags },
+      ...tags.map((item) => ({
+        label: item.tag,
+        value: item.tag,
+        count: item.count,
+      })),
+    ]
+  }, [t, tagCounts, tagFilter])
+
   return (
     <DataTablePage
       table={table}
@@ -410,6 +453,12 @@ export function ChannelsTable() {
             columnId: 'group',
             title: t('Group'),
             options: groupFilterOptions,
+            singleSelect: true,
+          },
+          {
+            columnId: 'tag',
+            title: t('Tag'),
+            options: tagFilterOptions,
             singleSelect: true,
           },
         ],
