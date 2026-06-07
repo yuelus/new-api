@@ -32,7 +32,7 @@ const ChannelsFilters = ({
   enableTagMode,
   formApi,
   groupOptions,
-  tagOptions,
+  tagOptions = [],
   loading,
   searching,
   t,

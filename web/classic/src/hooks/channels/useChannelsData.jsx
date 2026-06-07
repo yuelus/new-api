@@ -1160,6 +1160,7 @@ export const useChannelsData = () => {
     pageSize,
     channelCount,
     groupOptions,
+    tagOptions,
     idSort,
     enableTagMode,
     enableBatchDelete,
