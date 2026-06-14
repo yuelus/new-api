@@ -287,6 +287,7 @@ const SENSITIVE_FORM_FIELDS = [
   'force_format',
   'thinking_to_content',
   'proxy',
+  'direct_mode',
   'http_protocol',
   'http2_connection_shards',
   'pass_through_body_enabled',
@@ -4196,6 +4197,29 @@ export function ChannelMutateDrawer({
                                     )}
                                   </FormDescription>
                                   <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name='direct_mode'
+                              render={({ field }) => (
+                                <FormItem className={sideDrawerSwitchItemClassName()}>
+                                  <div>
+                                    <FormLabel>{t('Direct Mode')}</FormLabel>
+                                    <FormDescription>
+                                      {t(
+                                        'Bypass system proxy (e.g., Clash TUN mode) and connect directly. Automatically adds direct rule to Clash config.'
+                                      )}
+                                    </FormDescription>
+                                  </div>
+                                  <FormControl>
+                                    <Switch
+                                      checked={Boolean(field.value)}
+                                      onCheckedChange={field.onChange}
+                                    />
+                                  </FormControl>
                                 </FormItem>
                               )}
                             />

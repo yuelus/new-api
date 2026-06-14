@@ -356,6 +356,17 @@ func newProxyHTTPClient(proxyURL *url.URL) (*http.Client, error) {
 }
 
 // GetHttpClientWithProxy returns the default client or a cached proxy-enabled client.
+// GetDirectHttpClient returns a client that bypasses environment and channel proxies.
+// It keeps the upstream transport policy (HTTP version and shard settings) while
+// explicitly disabling ProxyFromEnvironment for channels using direct mode.
+func GetDirectHttpClient(settings dto.ChannelSettings) *http.Client {
+	policy := NormalizeHTTPTransportPolicy(settings)
+	transport := newRelayHTTPTransport()
+	transport.Proxy = nil
+	applyHTTPTransportPolicy(transport, policy)
+	return newRelayHTTPClient(transport)
+}
+
 func GetHttpClientWithProxy(rawProxyURL string) (*http.Client, error) {
 	return GetHttpClientWithProxySettings(rawProxyURL, dto.ChannelSettings{})
 }

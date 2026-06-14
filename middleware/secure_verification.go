@@ -24,13 +24,6 @@ func SecureVerificationRequired() gin.HandlerFunc {
 				return
 			}
 		}
-		if userID := c.GetInt("id"); userID > 0 {
-			if enabled, err := model.IsTwoFAEnabled(userID); err == nil && !enabled {
-				c.Set("secure_verified", true)
-				c.Next()
-				return
-			}
-		}
 		if !RequireSecurityProof(c, "channel.key.read", []string{"2fa", "passkey"}) {
 			return
 		}

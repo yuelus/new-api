@@ -1152,6 +1152,45 @@ func UpdateChannel(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+
+	// 处理直连模式的 Clash 配置
+	if channel.Setting != nil && *channel.Setting != "" {
+		var setting dto.ChannelSettings
+		if err := common.Unmarshal([]byte(*channel.Setting), &setting); err == nil {
+			// 如果启用了直连模式，尝试更新 Clash 配置
+			if setting.DirectMode && channel.GetBaseURL() != "" {
+				configs, err := service.FindClashConfigs()
+				if err == nil && len(configs) > 0 {
+					// 默认使用第一个有效的配置文件
+					for _, cfg := range configs {
+						if cfg.Valid {
+							if err := service.AddDirectRule(cfg.Path, channel.Name, channel.GetBaseURL()); err != nil {
+								common.SysLog(fmt.Sprintf("Failed to add Clash direct rule for channel %s: %v", channel.Name, err))
+							}
+							break
+						}
+					}
+				}
+			} else if !setting.DirectMode && originChannel.Setting != nil {
+				// 如果禁用了直连模式，移除之前的规则
+				var oldSetting dto.ChannelSettings
+				if err := common.Unmarshal([]byte(*originChannel.Setting), &oldSetting); err == nil && oldSetting.DirectMode {
+					configs, err := service.FindClashConfigs()
+					if err == nil && len(configs) > 0 {
+						for _, cfg := range configs {
+							if cfg.Valid {
+								if err := service.RemoveDirectRule(cfg.Path, channel.GetBaseURL()); err != nil {
+									common.SysLog(fmt.Sprintf("Failed to remove Clash direct rule for channel %s: %v", channel.Name, err))
+								}
+								break
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	model.InitChannelCache()
 	if proxyChanged {
 		service.InvalidateProxyClient(originProxy)
@@ -2288,5 +2327,23 @@ func OllamaVersion(c *gin.Context) {
 		"data": gin.H{
 			"version": version,
 		},
+	})
+}
+
+func GetClashConfigs(c *gin.Context) {
+	configs, err := service.FindClashConfigs()
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("未找到 Clash Verge 配置文件: %s", err.Error()),
+			"data":    []service.ClashConfig{},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data":    configs,
 	})
 }

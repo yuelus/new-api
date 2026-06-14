@@ -3620,6 +3620,8 @@
     "Provider updated successfully": "Provider updated successfully",
     "Provider-specific endpoint, account, and compatibility settings.": "Provider-specific endpoint, account, and compatibility settings.",
     "Proxy Address": "Proxy Address",
+    "Direct Mode": "Direct Mode",
+    "Bypass system proxy (e.g., Clash TUN mode) and connect directly. Automatically adds direct rule to Clash config.": "Bypass system proxy (e.g., Clash TUN mode) and connect directly. Automatically adds direct rule to Clash config.",
     "Proxy address must use HTTP, HTTPS, SOCKS5, or SOCKS5H and include a valid host": "Proxy address must use HTTP, HTTPS, SOCKS5, or SOCKS5H and include a valid host",
     "Prune Object Items": "Prune Object Items",
     "Prune object items by conditions": "Prune object items by conditions",

@@ -11,9 +11,11 @@ import (
 )
 
 type ChannelSettings struct {
-	ForceFormat            bool   `json:"force_format,omitempty"`
-	ThinkingToContent      bool   `json:"thinking_to_content,omitempty"`
-	Proxy                  string `json:"proxy"`
+	ForceFormat       bool   `json:"force_format,omitempty"`
+	ThinkingToContent bool   `json:"thinking_to_content,omitempty"`
+	Proxy             string `json:"proxy"`
+	// DirectMode bypasses all system and channel proxy settings for this channel.
+	DirectMode             bool   `json:"direct_mode,omitempty"`
 	PassThroughBodyEnabled bool   `json:"pass_through_body_enabled,omitempty"`
 	SystemPrompt           string `json:"system_prompt,omitempty"`
 	SystemPromptOverride   bool   `json:"system_prompt_override,omitempty"`
